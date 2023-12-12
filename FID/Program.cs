@@ -13,14 +13,14 @@ namespace FID
 
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Starting data processing...");
+                Console.WriteLine("Starting data processing...");
 
 
-            var companyData = ReadCompanyData("register.csv");
+                var companyData = ReadCompanyData("register.csv");
 
-            var (combinedData, unmatchedCompanies) = DataCombiner.CombineData(companyData);
+                var (combinedData, unmatchedCompanies) = DataCombiner.CombineData(companyData);
 
-            List<UnmatchedCompany> convertedUnmatchedCompanies = unmatchedCompanies.Select(c => ConvertToUnmatchedCompany(c)).ToList();
+                List<UnmatchedCompany> convertedUnmatchedCompanies = unmatchedCompanies.Select(c => ConvertToUnmatchedCompany(c)).ToList();
 
             DatabaseHelper.InsertDataIntoDatabase(combinedData);
 
@@ -29,11 +29,11 @@ namespace FID
 
 
             SaveCombinedData(combinedData);
-            SaveUnmatchedCompanies(unmatchedCompanies);
+                SaveUnmatchedCompanies(unmatchedCompanies);
 
 
-            Console.WriteLine("Data processing completed.");
-            Console.ReadLine();
+                Console.WriteLine("Data processing completed.");
+                Console.ReadLine();
         }
 
         private static List<Company> ReadCompanyData(string fileName)
@@ -104,5 +104,19 @@ namespace FID
 
             }
         }
+
+        public static class Logger
+        {
+            public static void LogError(string message, Exception ex)
+            {
+                Console.WriteLine($"Error: {message}, Exception: {ex.Message}");
+            }
+
+            public static void LogInfo(string message)
+            {
+                Console.WriteLine($"Info: {message}");
+            }
+        }
+
     }
 } 

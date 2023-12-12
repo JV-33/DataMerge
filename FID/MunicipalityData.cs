@@ -4,6 +4,7 @@
     {
         public static Dictionary<string, Tuple<string, List<string>>> NovadiUnPilsetas { get; } = new Dictionary<string, Tuple<string, List<string>>>()
         {
+ 
             {"Rīga", new Tuple<string, List<string>>("0001000", new List<string> {"Rīga"})},
             {"Jūrmala", new Tuple<string, List<string>>("0004000", new List<string> {"Jūrmala"})},
             {"Liepāja", new Tuple<string, List<string>>("", new List<string> {"Liepāja"})},

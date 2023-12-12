@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 using FID.Models;
 
 namespace FID
@@ -15,13 +16,26 @@ namespace FID
             foreach (var company in companies)
             {
                 bool matched = false;
+
+                var addressFirstPart = company.Address?.Split(',')[0].Trim();
+
                 foreach (var kvp in municipalityData)
                 {
                     string municipality = kvp.Key;
                     Tuple<string, List<string>> atvkAndCities = kvp.Value;
                     List<string> cities = atvkAndCities.Item2;
 
-                    if (company.Address != null && (cities.Any(city => company.Address.Contains(city)) || company.Address.Contains(municipality)))
+                    Func<string, bool> isMatch = city =>
+                    {
+
+                        string pattern = Regex.Escape(city);
+                        Regex cityRegex = new Regex(pattern, RegexOptions.IgnoreCase); // Using IgnoreCase for case-insensitive matching
+                        return cityRegex.IsMatch(addressFirstPart);
+                    };
+
+                    if (company.Address != null && (cities.Any(isMatch) || isMatch(municipality)))
+
+
                     {
                         combinedDataList.Add(new CombinedData
                         {
