@@ -22,7 +22,7 @@ namespace FID
             Console.WriteLine($"reading companies took: {stopwatch.Elapsed.TotalSeconds}");
             stopwatch.Reset();
             stopwatch.Start();
-            var (combinedData, unmatchedCompanies) = DataMerger.MergeCompaniesWithMunicipalities(companyData);
+            var (combinedData, unmatchedCompanies) = await DataMerger.MergeCompaniesWithMunicipalities(companyData);
             stopwatch.Stop();
             Console.WriteLine($"data merge took: {stopwatch.Elapsed.TotalSeconds}");
             stopwatch.Reset();

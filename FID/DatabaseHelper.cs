@@ -25,10 +25,8 @@ namespace FID
                 {
                     try
                     {
-                        foreach (var data in combinedData)
-                        {
-                            context.CombinedData.Add(data);
-                        }
+                        
+                        context.CombinedData.AddRange(combinedData);
                         context.SaveChanges();
                         transaction.Commit();
                         Console.WriteLine("Combined data successfully inserted into the database.");

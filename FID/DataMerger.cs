@@ -6,23 +6,26 @@ namespace FID
 {
     public static class DataMerger
     {
-        public static (List<MergedData>, List<Company>) MergeCompaniesWithMunicipalities(List<Company> companies)
+        public static async Task<(List<MergedData>, List<Company>)> MergeCompaniesWithMunicipalities(List<Company> companies)
         {
             var combinedDataList = new ConcurrentBag<MergedData>();
             var unmatchedCompanies = new ConcurrentBag<Company>();
 
-            foreach (var company in companies)
+            await Parallel.ForEachAsync(companies, (company, cancellationToken) =>
             {
                 var data = FindMunicipalityData(company);
 
                 if (data != null)
                 {
                     combinedDataList.Add(data);
-                    continue;
+                }
+                else
+                {
+                    unmatchedCompanies.Add(company);
                 }
 
-                unmatchedCompanies.Add(company);
-            }
+                return ValueTask.CompletedTask;
+            });
 
             return (combinedDataList.ToList(), unmatchedCompanies.ToList());
         }
