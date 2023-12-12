@@ -17,7 +17,7 @@ namespace FID
             }
         }
 
-        public static void InsertDataIntoDatabase(List<CombinedData> combinedData)
+        public static void InsertDataIntoDatabase(List<MergedData> combinedData)
         {
             using (var context = new ApplicationDbContext())
             {
@@ -68,7 +68,7 @@ namespace FID
 
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<CombinedData> CombinedData { get; set; }
+        public DbSet<MergedData> CombinedData { get; set; }
         public DbSet<UnmatchedCompany> UnmatchedCompanies { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

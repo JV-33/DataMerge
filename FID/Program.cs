@@ -1,4 +1,5 @@
-﻿using CsvHelper;
+﻿using System.Diagnostics;
+using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
 using FID.Models;
@@ -13,44 +14,53 @@ namespace FID
 
         static async Task Main(string[] args)
         {
-                Console.WriteLine("Starting data processing...");
-
-
-                var companyData = ReadCompanyData("register.csv");
-
-                var (combinedData, unmatchedCompanies) = DataCombiner.CombineData(companyData);
-
-                List<UnmatchedCompany> convertedUnmatchedCompanies = unmatchedCompanies.Select(c => ConvertToUnmatchedCompany(c)).ToList();
-
+            Console.WriteLine("Starting data processing...");
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var companyData = ReadCompanyData("register.csv");
+            stopwatch.Stop();
+            Console.WriteLine($"reading companies took: {stopwatch.Elapsed.TotalSeconds}");
+            stopwatch.Reset();
+            stopwatch.Start();
+            var (combinedData, unmatchedCompanies) = DataMerger.MergeCompaniesWithMunicipalities(companyData);
+            stopwatch.Stop();
+            Console.WriteLine($"data merge took: {stopwatch.Elapsed.TotalSeconds}");
+            stopwatch.Reset();
+            
+            List<UnmatchedCompany> convertedUnmatchedCompanies = unmatchedCompanies.Select(ConvertToUnmatchedCompany).ToList();
+            stopwatch.Start();
             DatabaseHelper.InsertDataIntoDatabase(combinedData);
-
+            stopwatch.Stop();
+            Console.WriteLine($"databae merged data insert took: {stopwatch.Elapsed.TotalSeconds}");
+            stopwatch.Reset();
+            stopwatch.Start();
             DatabaseHelper.InsertUnmatchedCompaniesIntoDatabase(convertedUnmatchedCompanies);
-
-
-
+            stopwatch.Stop();
+            Console.WriteLine($"databae unmatched data insert took: {stopwatch.Elapsed.TotalSeconds}");
+            stopwatch.Reset();
+            stopwatch.Start();
             SaveCombinedData(combinedData);
-                SaveUnmatchedCompanies(unmatchedCompanies);
-
-
-                Console.WriteLine("Data processing completed.");
-                Console.ReadLine();
+            SaveUnmatchedCompanies(unmatchedCompanies);
+            stopwatch.Stop();
+            Console.WriteLine($"data saved to files took: {stopwatch.Elapsed.TotalSeconds}");
+            
+            Console.WriteLine("Data processing completed.");
+            Console.ReadLine();
         }
 
         private static List<Company> ReadCompanyData(string fileName)
         {
             var filePath = Path.Combine(BaseDirectory, "FID", fileName);
 
-
-            using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 Delimiter = ";",
                 MissingFieldFound = null
-            }))
-            {
-                csv.Context.RegisterClassMap<CompanyMap>();
-                return csv.GetRecords<Company>().ToList();
-            }
+            });
+            csv.Context.RegisterClassMap<CompanyMap>();
+            
+            return csv.GetRecords<Company>().ToList();
         }
 
         private static UnmatchedCompany ConvertToUnmatchedCompany(Company company)
@@ -63,8 +73,7 @@ namespace FID
             };
         }
 
-
-        private static void SaveCombinedData(List<CombinedData> combinedData)
+        private static void SaveCombinedData(List<MergedData> combinedData)
         {
             var filePath = Path.Combine(BaseDirectory, "FID", "combinedData.csv");
 
@@ -93,7 +102,6 @@ namespace FID
             Console.WriteLine($"Total unmatched company records: {unmatchedCompanies.Count}");
         }
 
-
         public sealed class CompanyMap : ClassMap<Company>
         {
             public CompanyMap()
@@ -104,19 +112,5 @@ namespace FID
 
             }
         }
-
-        public static class Logger
-        {
-            public static void LogError(string message, Exception ex)
-            {
-                Console.WriteLine($"Error: {message}, Exception: {ex.Message}");
-            }
-
-            public static void LogInfo(string message)
-            {
-                Console.WriteLine($"Info: {message}");
-            }
-        }
-
     }
 } 

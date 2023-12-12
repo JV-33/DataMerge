@@ -1,7 +1,7 @@
 ﻿using System;
 namespace FID.Models
 {
-    public class CombinedData
+    public class MergedData
     {
         public int Id { get; set; }
         public string CompanyRegCode { get; set; }
